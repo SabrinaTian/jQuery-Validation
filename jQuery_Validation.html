@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+    form input,select{
+    margin:5px;
+    display:inline;
+    }
+    form span{
+    color: red;
+    background-image: url("image/error.png");
+    background-repeat: no-repeat;
+    padding-left: 18px;
+    }
+    .ok{
+    background-image: url("image/right.png");
+    background-repeat: no-repeat;
+    padding-left: 18px;
+    }
+    /*
+    form input[type="checkbox"]{
+    display: inline;
+    }*/
+    </style>
+</head>
+<body>
+<!--260行有验证的基本配置-->
+<!--352行有验证事变的错误消息，间接知道验证方法-->
+<form action="#" method="get" id="ff">
+    <div>
+    <label>邮箱</label>
+    <input type="text" name="email"></div>
+    <div>
+    <label>年龄</label>
+    <input type="text" name="age"></div>
+    <div>
+    <label>密码</label>
+    <input type="password" name="password" id="pass"></div>
+    <div>
+    <label>再次输入密码</label>
+    <input type="password" name="confirm"></div>
+    <div>
+    <label>地址</label>
+    <select name="address">
+        <option value="1">-----请选择-----</option>
+        <option value="1">北京</option>
+        <option value="1">上海</option>
+        <option value="1">南京</option>
+    </select></div>
+    <div>
+    <label>爱好</label>
+    看书:<input type="checkbox" name="like" value="看书"/>
+    上网:<input type="checkbox" name="like" value="上网"/>
+    旅游:<input type="checkbox" name="like" value="旅游"/>
+    </div>
+    <div>
+    <input type="file" name="image"></div>
+
+    <input type="submit" value="提交">
+</form>
+
+
+
+<script  type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+<script  type="text/javascript" src="js/jquery.validate.js"></script>
+<script type="text/javascript">
+
+    $.validator.addMethod("fileExt", function(value, element, params) {
+        var reg=new RegExp("\.(" + params + ")$","i");
+        return reg.test(value);
+    },$.validator.format("文件类型必须为{0}格式"));
+
+    // 所有的jquery插件都遵循一定流程，把dom对象转化为jquery对象，然后再做相应的操作
+    $(function(){
+        $("#ff").validate({
+            debug:false, // 定义debug模式,这样就不会提交
+            onkeyup:false,	// 如果验证失败则按键up验证设置为false,默认是true
+            errorElement:'span',
+            // 如果是字符串,则该样式会赋值到 errorElment指定的标签中
+            //success:"ok",
+            success:function(span){
+              $(span).attr("class","ok");
+            },
+            errorPlacement:function(span,element){
+                // 应该把原来的span删除掉.
+                $(element).siblings("span").remove();
+                $(element).parent().append(span);
+            },
+            // jquery validate可以采用name来确定验证的dom对象
+            rules:{
+                // 配置具体的验证规则
+                email:{
+                    required:true,
+                    // 如果有参数则:后面写参数,如果没有则true,多个参数则用数组
+                    email:true,
+                    // 仅仅只需要配置验证的url地址即可
+                    remote:{
+                        url:'servlet/AjaxServlet',
+                        // post请求IE中是不会又缓存问题
+                        type:'post'
+                    }
+                },
+                age:{
+                    required:true,
+                    number:true,
+                    min:18
+                },
+                password:{
+                    required:true,
+                    rangelength:[6,12]
+                },
+                confirm:{
+                    equalTo:"#pass"
+                },
+                address:{
+                    required:true
+                },
+                like:{
+                    required:true
+                },
+                image:{
+                    required:true,
+                    // 调用自定义的验证方法
+                    fileExt:"jpeg|jpg|gif|png"
+                }
+            },
+            messages:{
+                email:{
+                    required:"请输入邮箱",
+                    email:"邮箱格式不正确",
+                    remote:"该用户名已经被占用"
+                },
+                age:{
+                    required:"年龄不能为空",
+                    number:"年龄必须为数字",
+                    min:"年龄必须在18岁以上"
+                },
+                password:{
+                    required:"密码必填",
+                    rangelength:$.validator.format("密码的长度必须为{0}-{1}之间")
+                },
+                confirm:{
+                    required:"再次输入密码",
+                    equalTo:"密码不一致"
+                },
+                address:{
+                    required:"请选择地址"
+                },
+                like:{
+                    required:"必须要选择一个爱好"
+                },
+                image:{
+                    required:"请选择要上传的文件"
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
